@@ -50,21 +50,23 @@ class Minesweeper(Board):
         self.generate()
 
     def generate(self):
-        self.board = [1] * self.num_mins + [0] * (self.width * self.height - self.num_mins)
+        self.board = [10] * self.num_mins + [0] * (self.width * self.height - self.num_mins)
         random.shuffle(self.board)
         self.board = numpy.array(self.board)
         self.board = self.board.reshape(self.height, self.width)
-        self.is_showing = [[self.board[i][j] == 1 for j in range(len(self.board[i]))] for i in range(len(self.board))]
+        self.is_showing = [[self.board[i][j] == 10 for j in range(len(self.board[i]))] for i in range(len(self.board))]
 
     def render(self, screen):
         for i in range(self.height):
             for j in range(self.width):
-                pygame.draw.rect(screen, ({1: "red"}).get(self.board[i, j], "white"), (self.left + self.cell_size * i,
-                                                           self.top + self.cell_size * j, self.cell_size,
-                                                           self.cell_size),
-                                                            width=({1: 0}).get(self.board[i][j], 1))
-                # draw_text(sc, str(self.board[i][j]), 16, self.left + self.cell_size * i + 10,
-                #                                            self.top + self.cell_size * j)
+                pygame.draw.rect(screen, ({10: "red"}).get(self.board[i, j], "white"), (self.left + self.cell_size * i,
+                                                                                       self.top + self.cell_size * j,
+                                                                                       self.cell_size,
+                                                                                       self.cell_size),
+                                 width=({10: 0}).get(self.board[i][j], 1))
+                if self.is_showing[i][j] and self.board[i][j] != 10:
+                    draw_text(sc, str(self.board[i][j]), 16, self.left + self.cell_size * i + 10,
+                              self.top + self.cell_size * j)
 
     def get_cell(self, mouse_pos):
         x, y = mouse_pos
@@ -76,7 +78,42 @@ class Minesweeper(Board):
                     return r
 
     def on_click(self, cell):
-        pass
+        y, x = cell[1], cell[0]
+        if not(self.is_showing[y][x]):
+            try:
+                self.board[y][x] += self.board[y - 1][x]
+            except:
+                pass
+            try:
+                self.board[y][x] += self.board[y + 1][x]
+            except:
+                pass
+            try:
+                self.board[y][x] += self.board[y][x - 1]
+            except:
+                pass
+            try:
+                self.board[y][x] += self.board[y][x + 1]
+            except:
+                pass
+            try:
+                self.board[y][x] += self.board[y - 1][x + 1]
+            except:
+                pass
+            try:
+                self.board[y][x] += self.board[y + 1][x - 1]
+            except:
+                pass
+            try:
+                self.board[y][x] += self.board[y - 1][x - 1]
+            except:
+                pass
+            try:
+                self.board[y][x] += self.board[y + 1][x + 1]
+            except:
+                pass
+            self.board[y][x] /= 10
+            self.is_showing[y][x] = True
 
     def get_click(self, mouse_pos):
         cell = self.get_cell(mouse_pos)
